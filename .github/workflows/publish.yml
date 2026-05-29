@@ -1,4 +1,4 @@
-name: Publish Release
+name: Release to pkg.go.dev
 
 on:
   push:
@@ -6,37 +6,16 @@ on:
       - 'v*.*.*'
 
 jobs:
-  publish:
+  release:
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/v')
-    
     steps:
       - uses: actions/checkout@v4
-      
-      - name: Set up Go
-        uses: actions/setup-go@v4
-        with:
-          go-version: '1.22'
-      
       - name: Create GitHub Release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.ref_name }}
-          release_name: Release ${{ github.ref_name }}
-          body: |
-            ## Release ${{ github.ref_name }}
-            
-            Go module available via:
-            ```bash
-            go get github.com/globiguard/globiguard-go@${{ github.ref_name }}
-            ```
-            
-            This release is automatically indexed by pkg.go.dev.
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
           draft: false
           prerelease: false
-      
-      - name: Notify pkg.go.dev
-        run: |
-          curl https://sum.golang.org/lookup/github.com/globiguard/globiguard-go@${{ github.ref_name }} || true
